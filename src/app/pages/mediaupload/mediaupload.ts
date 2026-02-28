@@ -99,19 +99,29 @@ export class MediaUploadPage {
 
         this.logging.log("PWA mode: fetching image");
 
+        const inputElement = <HTMLInputElement>document.getElementById('img-upload-media');
+        const selectedFile = inputElement?.files?.[0];
+
+        if (!selectedFile) {
+            this.resetFileInput();
+            return;
+        }
+
         const reader = new FileReader();
 
         reader.onload = () => {
             this.imgData = reader.result;
             this.processImage();
+            this.resetFileInput();
         };
 
         reader.onerror = () => {
-            // alert('reader error');
+            this.logging.log('reader error', LogLevel.ERROR);
+            this.resetFileInput();
         };
 
         // read data from file input, this will then fire the onload event
-        reader.readAsDataURL((<any>document.getElementById('img-upload-media')).files[0]);
+        reader.readAsDataURL(selectedFile);
 
 
     }
@@ -232,6 +242,14 @@ export class MediaUploadPage {
     }
 
     async cancel() {
+        this.resetFileInput();
         await this.modalController.dismiss();
+    }
+
+    private resetFileInput() {
+        const inputElement = <HTMLInputElement>document.getElementById('img-upload-media');
+        if (inputElement) {
+            inputElement.value = '';
+        }
     }
 }
